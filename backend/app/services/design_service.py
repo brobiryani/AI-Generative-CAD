@@ -1,19 +1,38 @@
-from app.schemas.generate import GenerateRequest
+from app.database.database import SessionLocal
+from app.models.design import Design
 
 
-def process_design_request(request: GenerateRequest):
-    """
-    Process an incoming CAD generation request.
+def create_design(design_data: dict):
+    db = SessionLocal()
 
-    This function will later connect:
-    - LLM-based requirement extraction
-    - ML-based performance prediction
-    - Design optimization
-    - CAD generation
-    """
+    try:
+        design = Design(**design_data)
 
-    return {
-        "status": "processing",
-        "message": "Design request accepted for processing",
-        "input": request.model_dump()
-    }
+        db.add(design)
+        db.commit()
+        db.refresh(design)
+
+        return design
+
+    finally:
+        db.close()
+
+
+def get_design(design_id: int):
+    db = SessionLocal()
+
+    try:
+        return db.query(Design).filter(Design.id == design_id).first()
+
+    finally:
+        db.close()
+
+
+def get_all_designs():
+    db = SessionLocal()
+
+    try:
+        return db.query(Design).all()
+
+    finally:
+        db.close()
